@@ -127,10 +127,10 @@ size_t structures::LinkedStack<T>::size() const {
 }
 
 
-bool xml_valido(const string& xmlname) {
-    ifstream xml(xmlname);
+bool xml_valido(const string& xmlfilename) {
+    ifstream xml(xmlfilename);
     bool erro = false;
-    string tag_aux;  //recebe
+    string tag_aux;
     string linha;
     LinkedStack<string> pilhatag;
     if (xml.is_open()) {
@@ -156,7 +156,7 @@ bool xml_valido(const string& xmlname) {
                     if ((pilhatag.top() != tag_aux) || pilhatag.empty()) {
                         erro = true;
                     } else {
-                        pilhatag.pop();    // Se correto fecha tag
+                        pilhatag.pop();
                     }
                 }
             }
@@ -166,21 +166,22 @@ bool xml_valido(const string& xmlname) {
     }
     xml.close();
     return erro;
-} 
+} }}
 
 int main() {
 
     char xmlfilename[100];
-
-    std::cin >> xmlfilename;  // entrada
+    ifstream xmlfile;
+    cin >> xmlfilename;  // entrada
+    xmlfile.open(xmlfilename);
+    if (!xmlfile.is_open()) {
+        cout << "erro\n";
+        return -1;
+    }
+    if (xml_valido(xmlfilename)) {
+        cout << "erro\n";
+        return -1;
+    }
     
-    /*
-     
-       COLOQUE SEU CODIGO AQUI
-    
-    */
-
-    std::cout << xmlfilename << std::endl;  // esta linha deve ser removida
-
     return 0;
 }
