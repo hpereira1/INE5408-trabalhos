@@ -1,3 +1,4 @@
+// Copyright [2023] <Henrique Pereira Ramos, João Pedro Theodoro>
 #include "./linked_queue.h"
 #include "./linked_stack.h"
 #include <iostream>
@@ -71,6 +72,9 @@ int main() {
             for (int a = 0; a < linha.length(); a++) {
                 if (linha[a] == '<') {
                     erro = xml_valido(tag_stack, content_xml, linha, a);
+                    if (erro == true) {
+                        cout << "erro" << endl;
+                    }
                 }
             }
         }
@@ -78,10 +82,9 @@ int main() {
     }
     if (!tag_stack.empty()) {
         erro = true;
+        cout << "erro" << endl;
     }
 
-    if (!erro) {
 
-    }
     return 0;
 }
