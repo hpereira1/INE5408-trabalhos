@@ -1,138 +1,25 @@
+#include "./linked_queue.h"
+#include "./linked_stack.h"
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <vector>  
 #include <string>
-#include <cstdint>  // std::size_t
-#include <stdexcept>  // C++ exceptions
 
 using namespace std;
-using namespace structures;
 
-namespace structures {
-template <typename T>
-class LinkedStack {
- public:
-    // Construtor
-    LinkedStack();
-    // Destrutor
-    ~LinkedStack();
-    // limpa pilha
-    void clear();
-    // empilha
-    virtual void push(const T& data);
-    // desempilha
-    virtual T pop();
-    // dado no topo
-    T& top() const;
-    // pilha vazia
-    bool empty() const;
-    // tamanho da pilha
-    size_t size() const;
-
- private:
-    class Node {
-     public:
-        explicit Node(const T& data) : data_{data} {}
-        Node(const T& data, Node* next) : data_{data},
-                                          next_{next} {}
-        // getter: info
-        T& data() {
-            return data_;
-        }
-        // getter-constante: info
-        const T& data() const {
-            return data_;
-        }
-        // getter: próximo
-        Node* next() {
-            return next_;
-        }
-        // getter-constante: próximo
-        const Node* next() const {
-            return next_;
-        }
-        // setter: próximo
-        void next(Node* node) {
-            next_ = node;
-        }
-
-     private:
-        T data_;
-        Node* next_{nullptr};
-    };
-
-    // nodo-topo
-    Node* top_{nullptr};
-    // tamanho
-    std::size_t size_{0u};
-};
-
-} 
-
-template <typename T>
-structures::LinkedStack<T>::LinkedStack() {
-    top_ = nullptr;
-    size_ = 0;
-}
-
-template <typename T>
-structures::LinkedStack<T>::~LinkedStack() {
-    clear();
-}
-
-template <typename T>
-void structures::LinkedStack<T>::clear() {
-    while (!empty())
-        pop();
-}
-
-template <typename T>
-void structures::LinkedStack<T>::push(const T& data) {
-    Node* new_node = new Node(data, top_);
-    if (new_node == nullptr)
-        throw std::out_of_range("pilha cheia");
-    top_ = new_node;
-    size_++;
-}
-
-template <typename T>
-T structures::LinkedStack<T>::pop() {
-    if (empty())
-        throw std::out_of_range("pilha vazia");
-
-    Node* aux = top_;
-    top_ = top_->next();
-    T data = aux->data();
-    delete aux;
-    size_--;
-    return data;
-}
-
-template <typename T>
-T& structures::LinkedStack<T>::top() const {
-    if (empty())
-        throw std::out_of_range("lista vazia");
-    return top_->data();
-}
-
-template <typename T>
-bool structures::LinkedStack<T>::empty() const {
-    return (size_ == 0);
-}
-
-template <typename T>
-size_t structures::LinkedStack<T>::size() const {
-    return size_;
-}
+typedef struct robopos
+{   
+    int x;
+    int y;
+} robopos;
 
 
+/*
 bool xml_valido(const string& xmlfilename) {
     ifstream xml(xmlfilename);
     bool erro = false;
     string tag_aux;
     string linha;
-    LinkedStack<string> pilhatag;
+    structures::LinkedStack<string> pilhatag;
     if (xml.is_open()) {
         while(getline(xml, linha)) {
             for(size_t i = 0; i < linha.length(); i++) {
@@ -167,12 +54,48 @@ bool xml_valido(const string& xmlfilename) {
     xml.close();
     return erro;
 } }}
+*/
+bool xml_valido(const string& xmlfilename, int pos) {
+    int end_pos = pos;
+    bool erro = false;
+
+}
+
+
+string obtemValorTag(const string& fonte,const string&opentag,const string &closetag, size_t i) {
+    size_t initial_pos = fonte.find(opentag, i);
+    size_t final_pos = fonte.find(closetag, initial_pos);
+    initial_pos += opentag.length();
+
+    string tag_contents = fonte.substr(initial_pos, final_pos - initial_pos);
+    return tag_contents;
+}
+
+/*
+void info_gathering(string contents) {
+    size_t a = 0;
+    while (a < contents.length()) {
+        string open_tag = "<cenario>";
+        string close_tag = "</cenario>";
+        string cena = obtemValorTag(contents, open_tag, close_tag, a);
+        a += cena.length() + close_tag.length();
+        if (a > contents.length()) break;
+        const int altura = stoi(obtemValorTag(cena, "<altura>", "</altura>", 0));
+        const int largura = stoi(obtemValorTag(cena, "<largura>", "</largura>", 0));
+        const int initial_robo_x = stoi(obtemValorTag(cena, "<x>", "</x>", 0));
+        const int initial_robo_y = stoi(obtemValorTag(cena, "<y>", "</y>", 0));
+    }
+}
+*/
 
 int main() {
 
     char xmlfilename[100];
-    ifstream xmlfile;
     cin >> xmlfilename;  // entrada
+    ifstream xmlfile;
+    structures::LinkedQueue<string> content_xml;
+    structures::LinkedStack<string> tag_stack;
+
     xmlfile.open(xmlfilename);
     if (!xmlfile.is_open()) {
         cout << "erro\n";
@@ -182,6 +105,11 @@ int main() {
         cout << "erro\n";
         return -1;
     }
-    
+    std::stringstream stream;
+	stream << xmlfile.rdbuf();
+	std::string contents = stream.str();
+
+    xmlfile.close();
+    info_gathering(contents);
     return 0;
 }
