@@ -2,7 +2,7 @@
 #define STRUCTURES_LINKED_QUEUE_H
 
 #include <cstdint>
-
+#include <stdexcept>
 namespace structures {
 
 

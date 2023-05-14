@@ -12,53 +12,28 @@ typedef struct robopos
     int y;
 } robopos;
 
-
-/*
-bool xml_valido(const string& xmlfilename) {
-    ifstream xml(xmlfilename);
+bool xml_valido(structures::LinkedStack<string> &tag_stack, structures::LinkedQueue<string> &content_xml,string line, int position ) {
+    int end_pos = position;
     bool erro = false;
-    string tag_aux;
-    string linha;
-    structures::LinkedStack<string> pilhatag;
-    if (xml.is_open()) {
-        while(getline(xml, linha)) {
-            for(size_t i = 0; i < linha.length(); i++) {
-                if (linha[i] == '<') {
-                    if (!tag_aux.empty()){
-                        tag_aux.clear(); 
-                        }
-                    if(linha[i + 1] != '/') {
-                        i++;
-                        while(linha[i] != '>') {
-                            tag_aux= tag_aux + linha[i];
-                            ++i;
-                        }
-                        pilhatag.push(tag_aux); 
-                    } else {
-                    i = i + 2;
-                    while (linha[i] != '>' || linha[i] < linha.length()) {
-                        tag_aux = tag_aux + linha[i];
-                        i++;
-                    }
-                    if ((pilhatag.top() != tag_aux) || pilhatag.empty()) {
-                        erro = true;
-                    } else {
-                        pilhatag.pop();
-                    }
-                }
-            }
-        }
-    if (!pilhatag.empty()) {
-        erro = true;
+    while (line[end_pos] != '>') {
+        end_pos++;
     }
-    xml.close();
+    if (line[position + 1] == '/') {
+        string res = line.substr( position + 2 ,end_pos - position - 2 );
+        string igual = tag_stack.pop();
+        if (igual.compare(res) != 0) erro = true;        
+    }
+    else {
+        string res = line.substr(position + 1, end_pos - position - 1);
+        tag_stack.push(res);
+        if (res.compare("y") == 0 ||res.compare("x") == 0|| res.compare("altura") == 0 || res.compare("largura") == 0 || res.compare("nome") == 0 ) {
+            int new_end = end_pos;
+            while( line[new_end] != '<') new_end++;
+            string content = line.substr(end_pos + 1, new_end = end_pos - 1);
+            content_xml.enqueue(content);
+        }
+    }
     return erro;
-} }}
-*/
-bool xml_valido(const string& xmlfilename, int pos) {
-    int end_pos = pos;
-    bool erro = false;
-
 }
 
 
@@ -71,22 +46,7 @@ string obtemValorTag(const string& fonte,const string&opentag,const string &clos
     return tag_contents;
 }
 
-/*
-void info_gathering(string contents) {
-    size_t a = 0;
-    while (a < contents.length()) {
-        string open_tag = "<cenario>";
-        string close_tag = "</cenario>";
-        string cena = obtemValorTag(contents, open_tag, close_tag, a);
-        a += cena.length() + close_tag.length();
-        if (a > contents.length()) break;
-        const int altura = stoi(obtemValorTag(cena, "<altura>", "</altura>", 0));
-        const int largura = stoi(obtemValorTag(cena, "<largura>", "</largura>", 0));
-        const int initial_robo_x = stoi(obtemValorTag(cena, "<x>", "</x>", 0));
-        const int initial_robo_y = stoi(obtemValorTag(cena, "<y>", "</y>", 0));
-    }
-}
-*/
+
 
 int main() {
 
@@ -95,21 +55,33 @@ int main() {
     ifstream xmlfile;
     structures::LinkedQueue<string> content_xml;
     structures::LinkedStack<string> tag_stack;
+    bool erro = false;
+    string linha;
 
     xmlfile.open(xmlfilename);
     if (!xmlfile.is_open()) {
         cout << "erro\n";
         return -1;
+    } 
+    else {
+        while( !xmlfile.eof() && erro == false) {
+            getline(xmlfile, linha);
+            if (linha[0] == '1' || linha[0] =='0')
+                continue;
+            for (int a = 0; a < linha.length(); a++) {
+                if (linha[a] == '<') {
+                    erro = xml_valido(tag_stack, content_xml, linha, a);
+                }
+            }
+        }
+        xmlfile.close();
     }
-    if (xml_valido(xmlfilename)) {
-        cout << "erro\n";
-        return -1;
+    if (!tag_stack.empty()) {
+        erro = true;
     }
-    std::stringstream stream;
-	stream << xmlfile.rdbuf();
-	std::string contents = stream.str();
 
-    xmlfile.close();
-    info_gathering(contents);
+    if (!erro) {
+
+    }
     return 0;
 }
