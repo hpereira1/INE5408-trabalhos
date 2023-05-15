@@ -55,7 +55,7 @@ void determinaConexo(structures::LinkedQueue<string> &content_xml, string arquiv
         largura = stoi(content_xml.dequeue());
         robo_x = stoi(content_xml.dequeue());
         robo_y = stoi(content_xml.dequeue());
-
+    
         int **E;
         int **R;
         E = new int * [altura];
@@ -79,61 +79,60 @@ void determinaConexo(structures::LinkedQueue<string> &content_xml, string arquiv
             getline(filexml,linha);
             i++;
         }
+        coord aux;
+        aux.x = robo_x;
+        aux.y = robo_y;
+        fila.enqueue(aux);
+        contagem = 0;
+        if (E[robo_x][robo_y] == 1 && R[robo_x][robo_y] == 0) {
+            contagem = contagem + 1;
+            R[robo_x][robo_y] = contagem;
         
-        for (int i = 0; i < altura; i++) {
-            for (int j = 0; j < largura; j++) {
-                //if novo componente conexo => fila.enqueue()
-                if (E[i][j] == 1 && R[i][j] == 0) {
-                    coord aux;
-                    aux.x = i;
-                    aux.y = j;
-                    fila.enqueue(aux);
-                    contagem = contagem + 1;
-                    R[i][j] = contagem;
+            while(!fila.empty()) {
+                coord aux;
+                coord ponto = fila.dequeue();
+                R[ponto.x][ponto.y] = contagem;    
                 
-                    while(!fila.empty()) {
-                        coord aux;
-                        coord ponto = fila.dequeue();
-                        R[ponto.x][ponto.y] = contagem;    
-                        
-                        if (ponto.x > 0) {
-                            if (E[ponto.x - 1][ponto.y] == 1 && R[ponto.x - 1][ponto.y] == 0) {
-                                aux.x =  ponto.x - 1;
-                                aux.y =  ponto.y;
-                                fila.enqueue(aux);
-                                R[aux.x][aux.y] = contagem;
-                            }
-                        }
-                        if (ponto.x < altura - 1) {
-                            if (E[ponto.x + 1][ponto.y] == 1 && R[ponto.x + 1][ponto.y] == 0) {
-                                aux.x =  ponto.x + 1;
-                                aux.y =  ponto.y; 
-                                fila.enqueue(aux);
-                                R[aux.x][aux.y] = contagem;
-                            }
-                        }
-                        if (ponto.y > 0) {
-                            if (E[ponto.x][ponto.y - 1] == 1 && R[ponto.x][ponto.y - 1] == 0) {
-                                aux.x = ponto.x;
-                                aux.y = ponto.y - 1;
-                                fila.enqueue(aux);
-                                R[aux.x][aux.y] = contagem;
-                            }
-                        }
-                        if (ponto.y < largura - 1) {
-                            if (E[ponto.x][ponto.y + 1] == 1 && R[ponto.x][ponto.y + 1] == 0) {
-                                aux.x = ponto.x;
-                                aux.y = ponto.y + 1;
-                                fila.enqueue(aux); 
-                                R[aux.x][aux.y] = contagem;
-                            }
-                        }
+                if (ponto.x > 0) {
+                    if (E[ponto.x - 1][ponto.y] == 1 && R[ponto.x - 1][ponto.y] == 0) {
+                        aux.x =  ponto.x - 1;
+                        aux.y =  ponto.y;
+                        fila.enqueue(aux);
+                        R[aux.x][aux.y] = contagem;
+                        contagem++;
+                    }
+                }
+                if (ponto.x < altura - 1) {
+                    if (E[ponto.x + 1][ponto.y] == 1 && R[ponto.x + 1][ponto.y] == 0) {
+                        aux.x =  ponto.x + 1;
+                        aux.y =  ponto.y; 
+                        fila.enqueue(aux);
+                        R[aux.x][aux.y] = contagem;
+                        contagem++;
+                    }
+                }
+                if (ponto.y > 0) {
+                    if (E[ponto.x][ponto.y - 1] == 1 && R[ponto.x][ponto.y - 1] == 0) {
+                        aux.x = ponto.x;
+                        aux.y = ponto.y - 1;
+                        fila.enqueue(aux);
+                        R[aux.x][aux.y] = contagem;
+                        contagem++;
+                    }
+                }
+                if (ponto.y < largura - 1) {
+                    if (E[ponto.x][ponto.y + 1] == 1 && R[ponto.x][ponto.y + 1] == 0) {
+                        aux.x = ponto.x;
+                        aux.y = ponto.y + 1;
+                        fila.enqueue(aux); 
+                        R[aux.x][aux.y] = contagem;
+                        contagem++;
                     }
                 }
             }
-        }
+        }    
+        
 
-        // deleta a matriz.
         for (int i = 0; i < altura; i++) {
             delete[] E[i];
             delete[] R[i];
@@ -184,11 +183,15 @@ int main() {
         erro = true;
         cout << "erro" << endl;
     }
+    
     if (!erro) {
         determinaConexo(content_xml, xmlfilename);
     } else {
         cout << "erro" << std::endl;
     }
+
+    
+
 
     return 0;
 }
