@@ -7,11 +7,11 @@
 
 using namespace std;
 
-typedef struct robopos
+typedef struct coord
 {   
     int x;
     int y;
-} robopos;
+} coord;
 
 bool xml_valido(structures::LinkedStack<string> &tag_stack, structures::LinkedQueue<string> &content_xml,string line, int position ) {
     int end_pos = position;
@@ -30,22 +30,122 @@ bool xml_valido(structures::LinkedStack<string> &tag_stack, structures::LinkedQu
         if (res.compare("y") == 0 ||res.compare("x") == 0|| res.compare("altura") == 0 || res.compare("largura") == 0 || res.compare("nome") == 0 ) {
             int new_end = end_pos;
             while( line[new_end] != '<') new_end++;
-            string content = line.substr(end_pos + 1, new_end = end_pos - 1);
+            string content = line.substr(end_pos + 1, new_end - end_pos - 1);
             content_xml.enqueue(content);
         }
     }
     return erro;
 }
 
+void determinaConexo(structures::LinkedQueue<string> &content_xml, string arquivoxml) {
+    ifstream filexml;
+    filexml.open(arquivoxml);
+    structures::LinkedQueue<coord> fila;
+    string nome;
+    int altura;
+    int largura;
+    int robo_x;
+    int robo_y;
+    int contagem;
+    string linha;
 
-string obtemValorTag(const string& fonte,const string&opentag,const string &closetag, size_t i) {
-    size_t initial_pos = fonte.find(opentag, i);
-    size_t final_pos = fonte.find(closetag, initial_pos);
-    initial_pos += opentag.length();
+    while(!content_xml.empty()) {
+        nome = content_xml.dequeue();
+        altura = stoi(content_xml.dequeue());
+        largura = stoi(content_xml.dequeue());
+        robo_x = stoi(content_xml.dequeue());
+        robo_y = stoi(content_xml.dequeue());
 
-    string tag_contents = fonte.substr(initial_pos, final_pos - initial_pos);
-    return tag_contents;
-}
+        int **E;
+        int **R;
+        E = new int * [altura];
+        R = new int * [altura];
+
+        for (int i = 0; i < altura; i++) {
+            E[i] = new int[largura];
+            R[i] = new int[largura];
+        }
+        getline(filexml,linha);
+        while ((linha[0] != '0' && linha[0] != '1') ) {
+            getline(filexml,linha);
+        }
+        
+        int i = 0;
+        while (linha[0] == '0' || linha[0] == '1') {
+            for (int j = 0; j < linha.length(); j++) {
+                E[i][j] = (int)linha[j] - 48;
+                R[i][j] = 0;
+            } 
+            getline(filexml,linha);
+            i++;
+        }
+        
+        for (int i = 0; i < altura; i++) {
+            for (int j = 0; j < largura; j++) {
+                //if novo componente conexo => fila.enqueue()
+                if (E[i][j] == 1 && R[i][j] == 0) {
+                    coord aux;
+                    aux.x = i;
+                    aux.y = j;
+                    fila.enqueue(aux);
+                    contagem = contagem + 1;
+                    R[i][j] = contagem;
+                
+                    while(!fila.empty()) {
+                        coord aux;
+                        coord ponto = fila.dequeue();
+                        R[ponto.x][ponto.y] = contagem;    
+                        
+                        if (ponto.x > 0) {
+                            if (E[ponto.x - 1][ponto.y] == 1 && R[ponto.x - 1][ponto.y] == 0) {
+                                aux.x =  ponto.x - 1;
+                                aux.y =  ponto.y;
+                                fila.enqueue(aux);
+                                R[aux.x][aux.y] = contagem;
+                            }
+                        }
+                        if (ponto.x < altura - 1) {
+                            if (E[ponto.x + 1][ponto.y] == 1 && R[ponto.x + 1][ponto.y] == 0) {
+                                aux.x =  ponto.x + 1;
+                                aux.y =  ponto.y; 
+                                fila.enqueue(aux);
+                                R[aux.x][aux.y] = contagem;
+                            }
+                        }
+                        if (ponto.y > 0) {
+                            if (E[ponto.x][ponto.y - 1] == 1 && R[ponto.x][ponto.y - 1] == 0) {
+                                aux.x = ponto.x;
+                                aux.y = ponto.y - 1;
+                                fila.enqueue(aux);
+                                R[aux.x][aux.y] = contagem;
+                            }
+                        }
+                        if (ponto.y < largura - 1) {
+                            if (E[ponto.x][ponto.y + 1] == 1 && R[ponto.x][ponto.y + 1] == 0) {
+                                aux.x = ponto.x;
+                                aux.y = ponto.y + 1;
+                                fila.enqueue(aux); 
+                                R[aux.x][aux.y] = contagem;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // deleta a matriz.
+        for (int i = 0; i < altura; i++) {
+            delete[] E[i];
+            delete[] R[i];
+        }
+        delete[] E;
+        delete[] R; 
+
+        cout << nome <<" "<< contagem << endl;
+    }
+
+    filexml.close();
+    }
 
 
 
@@ -84,7 +184,11 @@ int main() {
         erro = true;
         cout << "erro" << endl;
     }
-
+    if (!erro) {
+        determinaConexo(content_xml, xmlfilename);
+    } else {
+        cout << "erro" << std::endl;
+    }
 
     return 0;
 }
