@@ -79,6 +79,7 @@ void determinaConexo(structures::LinkedQueue<string> &content_xml, string arquiv
             getline(filexml,linha);
             i++;
         }
+        fila.clear();
         coord aux;
         aux.x = robo_x;
         aux.y = robo_y;
@@ -89,8 +90,9 @@ void determinaConexo(structures::LinkedQueue<string> &content_xml, string arquiv
             R[robo_x][robo_y] = contagem;
         
             while(!fila.empty()) {
-                coord aux;
                 coord ponto = fila.dequeue();
+                coord aux;
+                
                 R[ponto.x][ponto.y] = contagem;    
                 
                 if (ponto.x > 0) {
